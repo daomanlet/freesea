@@ -24,8 +24,8 @@ def get_downloads():
     return json.dumps(res)
 
 
-def downloadThread(url, keyword):
-    path = os.path.join(Config.VIDEO_WEBDAV, keyword)
+def downloadThread(url, keyword, name):
+    path = os.path.join(os.path.join(Config.VIDEO_WEBDAV, name), keyword)
     Path(path).mkdir(parents=True, exist_ok=True)
     ydl_opts = {
         'outtmpl': os.path.join(path, "%(title)s.%(ext)s"),
@@ -46,18 +46,24 @@ def downloadThread(url, keyword):
 @app.route('/search', methods=['GET'])
 def dark_search():
     keyword = request.args.get('keywords')
-    url = "https://cn.pornhub.com/video/search?search="+keyword
-    ##url = "https://www.youtube.com/results?search_query="+keyword
-    filename = os.path.join(Config.IMG_CACHE, str(uuid.uuid4())+'.jpg')
+    ##url = "https://cn.pornhub.com/video/search?search="+keyword
+    url = "https://www.youtube.com/results?search_query="+keyword
+    name = ""
+    if current_user.is_authenticated:
+        name = current_user.email
+    userfolder = os.path.join(Config.IMG_CACHE,name);
+    Path(userfolder).mkdir(parents=True, exist_ok=True)
+    filename = os.path.join(userfolder, str(uuid.uuid4())+'.jpg')
     ##filename = str(uuid.uuid4())+'.jpg'
     if not os.path.exists(filename):
-        options = {
-            'quiet': '',
-            "xvfb" : ''
-        }
+        # options = {
+        #     'quiet': '',
+        #     "xvfb" : ''
+        # }
+        options={}
         imgkit.from_url(url, filename, options=options)
         try:
-            t_temp = threading.Thread(target=downloadThread, args=(url, keyword))
+            t_temp = threading.Thread(target=downloadThread, args=(url, keyword, name))
             t_temp.start()
         except Exception as ex:
             print(ex)
@@ -104,6 +110,6 @@ def root():
 
 if __name__ == '__main__':
     db.create_all()
-    app.run(host = '192.168.2.22',
+    app.run(host = '127.0.0.1',
         port = 7777, debug=True)
 
