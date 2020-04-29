@@ -13,7 +13,7 @@ from app.models import User
 from app.forms import LoginForm, RegistrationForm
 from app.webdav import WebDAV
 from app import app, db
-
+from sites import siteconfig
 
 @app.route('/downloads', methods=['GET'])
 def get_downloads():
@@ -46,15 +46,22 @@ def downloadThread(url, keyword, name):
 
 @app.route('/search', methods=['GET'])
 def dark_search():
+    site = 'youtube'
     keyword = request.args.get('keywords')
-    ##url = "https://cn.pornhub.com/video/search?search="+keyword
-    url = "https://www.youtube.com/results?search_query="+keyword
+    site = request.args.get('domain')
+    siteConfig = siteconfig.findAvailable(site)
+    if siteConfig is not None:
+        url = siteConfig['search_url'] + keyword
+        site = 'youtube'
+    else :
+        url = "https://www.youtube.com/results?search_query="+keyword
+        ##url = "https://cn.pornhub.com/video/search?search="+keyword
     name = ""
     if current_user.is_authenticated:
         name = current_user.email
     userfolder = os.path.join(Config.IMG_CACHE, name)
     Path(userfolder).mkdir(parents=True, exist_ok=True)
-    filename = os.path.join(userfolder, str(uuid.uuid4())+'.jpg')
+    filename = os.path.join(userfolder, str(uuid.uuid4())+site+'.jpg')
     ##filename = str(uuid.uuid4())+'.jpg'
     if not os.path.exists(filename):
         options = {}
