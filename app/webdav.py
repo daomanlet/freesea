@@ -27,5 +27,37 @@ class WebDAV():
         else :
             return False
     
-    def shareFolder(self, name):
-        return
+    def getRepositoryID(self, repo_name):
+        url = Config.REMOTE_STORAGE_URL+'/api2/repos/'
+        resp = self._http.request(
+            'GET', url, headers={"Authorization": 'Token ' + self._token})
+        repos = json.loads(resp.data.decode('utf-8'))
+        repo_id = None
+        for i in repos:
+            if i['name'] == repo_name:
+                repo_id = i['id']
+                break
+        return repo_id
+
+    def shareFolder(self, repo_name, email, permission='r'):
+        repo_id = self.getRepositoryID(repo_name)
+        if repo_id is None:
+            repo_id = self.create_repository(repo_name)
+        url = Config.REMOTE_STORAGE_URL+'/api2/shared-repos/'+repo_id+'/'
+        param = '?share_type=personal&user='+email+'&permission='+permission
+        url = url + param
+        resp = self._http.request(
+            'PUT', url, headers={"Authorization": 'Token ' + self._token})            
+        ret = json.loads(resp.data.decode('utf-8'))
+        if ret == "success":
+            return True
+        return False
+
+    def create_repository(self, repo_name):
+        url = Config.REMOTE_STORAGE_URL+'/api2/repos/'
+        headers = {'Authorization': 'Token ' + self._token,
+                   'Accept': 'application/json; indent=4'}
+        fields = {'name': repo_name, 'desc': 'darksite added'}
+        resp = self._http.request('POST', url, fields=fields, headers=headers)
+        repo_id = json.loads(resp.data.decode('utf-8'))['repo_id']
+        return repo_id

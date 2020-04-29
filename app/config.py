@@ -20,3 +20,5 @@ class Config(object):
     REMOTE_STORAGE_USER = 'xiazheny@gmail.com'
     REMOTE_STORAGE_PWD = 'Welcome1'
     
+    # community version using default share library to make other users check download files
+    COMMUNITY_VERSION_SHARE_LIBRARY = 'video'  

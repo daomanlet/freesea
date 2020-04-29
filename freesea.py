@@ -11,6 +11,7 @@ from youtube_dl.utils import MaxDownloadsReached
 from app.config import Config
 from app.models import User
 from app.forms import LoginForm, RegistrationForm
+from app.webdav import WebDAV
 from app import app, db
 
 
@@ -51,29 +52,33 @@ def dark_search():
     name = ""
     if current_user.is_authenticated:
         name = current_user.email
-    userfolder = os.path.join(Config.IMG_CACHE,name);
+    userfolder = os.path.join(Config.IMG_CACHE, name)
     Path(userfolder).mkdir(parents=True, exist_ok=True)
     filename = os.path.join(userfolder, str(uuid.uuid4())+'.jpg')
     ##filename = str(uuid.uuid4())+'.jpg'
     if not os.path.exists(filename):
-        # options = {
-        #     'quiet': '',
-        #     "xvfb" : ''
-        # }
-        options={}
+        options = {}
+        if os.name != 'nt':
+            options = {
+                'quiet': '',
+                "xvfb": ''
+            }
         imgkit.from_url(url, filename, options=options)
         try:
-            t_temp = threading.Thread(target=downloadThread, args=(url, keyword, name))
+            t_temp = threading.Thread(
+                target=downloadThread, args=(url, keyword, name))
             t_temp.start()
         except Exception as ex:
             print(ex)
             traceback.print_exc()
     return send_file(filename, mimetype='image/jpg')
 
+
 @app.route('/logout')
 def logout():
     logout_user()
     return redirect('/index')
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -89,6 +94,7 @@ def login():
         return redirect('/index')
     return render_template('login.html', title='Sign In', form=form)
 
+
 @app.route("/register", methods=["GET", "POST"])
 def user_register():
     if current_user.is_authenticated:
@@ -99,17 +105,21 @@ def user_register():
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
+        webdav = WebDAV()
+        webdav.addUser(form.email.data, form.password.data)
+        webdav.shareFolder(Config.COMMUNITY_VERSION_SHARE_LIBRARY, form.email.data)
         flash('Congratulations, you are now a registered user!')
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
+
 
 @app.route('/')
 @app.route('/index')
 def root():
     return render_template('index.html', title='Home')
 
+
 if __name__ == '__main__':
     db.create_all()
-    app.run(host = '127.0.0.1',
-        port = 7777, debug=True)
-
+    app.run(host='127.0.0.1',
+            port=7777, debug=True)
