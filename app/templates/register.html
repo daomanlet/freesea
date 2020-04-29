@@ -1,6 +1,35 @@
 {% extends "base.html" %}
 
 {% block content %}
+<div class="wrapper fadeInDown">
+    <div id="formContent">
+        <form action="" method="post" novalidate>
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+                {{ form.email(size=32,class="form-control",placeholder="邮件") }}
+                {% for error in form.email.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </div>
+            <div class="form-group">
+                {{ form.password(size=32,class="form-control",placeholder="密码") }}
+                {% for error in form.password.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </div>
+            <div class="form-group">
+                {{ form.password2(size=32,class="form-control",placeholder="请重复输入密码") }}
+                {% for error in form.password.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </div>            
+            <div class="form-group">
+            {{ form.submit(class="btn btn-primary mb-2",value="注册") }}
+            </div>
+        </form>
+    </div>
+</div>
+<!--
     <h1>Register</h1>
     <form action="" method="post">
         {{ form.hidden_tag() }}
@@ -27,4 +56,5 @@
         </p>
         <p>{{ form.submit() }}</p>
     </form>
+-->
 {% endblock %}
