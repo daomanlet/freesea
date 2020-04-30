@@ -20,5 +20,11 @@ class Config(object):
     REMOTE_STORAGE_USER = 'xiazheny@gmail.com'
     REMOTE_STORAGE_PWD = 'Welcome1'
     
-    # community version using default share library to make other users check download files
+    # community edition using default share library to make other users check download files
     COMMUNITY_VERSION_SHARE_LIBRARY = 'video'  
+
+    #SMTP Server
+    SMTP_SERVER = 'smtp.gmail.com'
+    SMTP_SERVER_PORT = 465
+    ADMIN_EMAIL = 'xiazheny@gmail.com'
+    ADMIN_EMAIL_PASSCODE = '9post96423'

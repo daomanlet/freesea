@@ -12,8 +12,15 @@ from app.config import Config
 from app.models import User
 from app.forms import LoginForm, RegistrationForm
 from app.webdav import WebDAV
+from app.email import EmailService
 from app import app, db
 from sites import siteconfig
+from concurrent.futures import ThreadPoolExecutor
+import threading, queue
+import time
+
+domainExecutor = {}
+rets = queue.Queue()
 
 @app.route('/downloads', methods=['GET'])
 def get_downloads():
@@ -35,10 +42,11 @@ def downloadThread(url, keyword, name):
         "max_downloads": 1
     }
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        res = None
+        res = { 'email':name,'rets':None}
         try:
-            res = ydl.extract_info(url, force_generic_extractor=ydl.params.get(
+            res['rets'] = ydl.extract_info(url, force_generic_extractor=ydl.params.get(
                 'force_generic_extractor', False))
+            
         except MaxDownloadsReached:
             ydl.to_screen('[info] Maximum number of downloaded files reached.')
     return res
@@ -49,13 +57,14 @@ def dark_search():
     site = 'youtube'
     keyword = request.args.get('keywords')
     site = request.args.get('domain')
-    siteConfig = siteconfig.findAvailable(site)
+    siteConfig = siteconfig.findAvailableSiteConfigure(site)
     if siteConfig is not None:
         url = siteConfig['search_url'] + keyword
-        site = 'youtube'
     else :
         url = "https://www.youtube.com/results?search_query="+keyword
+        site= 'youtube'        
         ##url = "https://cn.pornhub.com/video/search?search="+keyword
+    executor = domainExecutor[site]
     name = ""
     if current_user.is_authenticated:
         name = current_user.email
@@ -72,9 +81,13 @@ def dark_search():
             }
         imgkit.from_url(url, filename, options=options)
         try:
-            t_temp = threading.Thread(
-                target=downloadThread, args=(url, keyword, name))
-            t_temp.start()
+            # t_temp = threading.Thread(
+            #     target=downloadThread, args=(url, keyword, name))
+            # t_temp.start()
+            args = [url, keyword, name]
+            #lambda p: say_something(*p), arr1
+            future = executor.submit(lambda p: downloadThread(*p),args)
+            rets.put(future)
         except Exception as ex:
             print(ex)
             traceback.print_exc()
@@ -126,7 +139,23 @@ def root():
     return render_template('index.html', title='Home')
 
 
+def dealDownloadResults():
+    while True:
+        future = rets.get()
+        ret = future.result()
+        print(ret)
+        sendMail = EmailService()
+        sendMail.sendMail(ret['email'], ret['rets'])
+        time.sleep(1)
+    
 if __name__ == '__main__':
     db.create_all()
+    for site in siteconfig.SitesAvailable:
+        executor = ThreadPoolExecutor(max_workers=site['thread_pool_size'])
+        domainExecutor[site['name']]=executor
+        
+    thread = threading.Thread(target=dealDownloadResults, daemon=True)
+    thread.start()
     app.run(host='127.0.0.1',
             port=7777, debug=True)
+    thread._stop()
