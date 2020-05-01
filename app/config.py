@@ -24,7 +24,7 @@ class Config(object):
     COMMUNITY_VERSION_SHARE_LIBRARY = 'video'  
 
     #SMTP Server
-    SMTP_SERVER = 'smtp.gmail.com'
+    SMTP_SERVER = 'smtp.qq.com'
     SMTP_SERVER_PORT = 465
-    ADMIN_EMAIL = 'xiazheny@gmail.com'
-    ADMIN_EMAIL_PASSCODE = '9post96423'
+    ADMIN_EMAIL = '1814533739@qq.com'
+    ADMIN_EMAIL_PASSCODE = 'oqqnkspayvhxefib'

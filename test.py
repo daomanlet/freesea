@@ -1,16 +1,18 @@
 from app.remote_storage import RemoteStorage
+from app.webdav import WebDAV
+from app.email import EmailService
 import sys
 
-def testRemoteStorage():
-    storage = RemoteStorage("北京")
-    #storage.upload("C:\\Users\\xia_z\\src\\youtube_crawler\\darksite\\video\\北京\\北京姐们探讨如何更爽的操逼.jpg")
-    #storage.upload("app.db")
-    print(sys.getdefaultencoding())
-    s = "./video/北京.txt"
-    ret = storage.upload(s)
-    print(ret.status)
+def testWebdavStorage():
+    webdav = WebDAV()
+    ret = webdav.addUser('xia_zheny@hotmail.com','Welcome1')
+    print(ret)
+
+def testEmail():
+    email = EmailService()
+    email.sendMail('xia_zhenyu@hotmail.com','中文内容')
 
 if __name__ == '__main__':
-
-    testRemoteStorage()
+    testEmail()
+    
     
