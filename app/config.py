@@ -15,7 +15,7 @@ class Config(object):
     IMG_CACHE = os.path.join(basedir, 'img')
 
     VIDEO_WEBDAV = os.path.join(basedir, 'video')
-
+    ## for seafile webdav server
     REMOTE_STORAGE_URL = 'http://192.168.2.22'
     REMOTE_STORAGE_USER = 'xiazheny@gmail.com'
     REMOTE_STORAGE_PWD = 'Welcome1'
