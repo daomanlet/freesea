@@ -17,3 +17,4 @@
 ## uBuntu使用imgkit需要安装特别的部分
 * 参照imgkit[https://pypi.org/project/imgkit/]
  ** 其中静态库[https://github.com/jarrekk/imgkit/blob/master/travis/init.sh]也需要
+ ** 特别加上这个 sudo apt-get install libssl1.0-dev 

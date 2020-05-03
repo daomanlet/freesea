@@ -81,11 +81,7 @@ def dark_search():
             }
         imgkit.from_url(url, filename, options=options)
         try:
-            # t_temp = threading.Thread(
-            #     target=downloadThread, args=(url, keyword, name))
-            # t_temp.start()
             args = [url, keyword, name]
-            #lambda p: say_something(*p), arr1
             future = executor.submit(lambda p: downloadThread(*p),args)
             rets.put(future)
         except Exception as ex:
