@@ -25,12 +25,15 @@ class DownloadService():
         _thread.start()
 
     def dealDownloadResults(self):
+        content = ''
         while True:
             future = self._rets.get()
             ret = future.result()
             print(ret)
             sendMail = EmailService()
-            sendMail.sendMail(ret['email'], ret['rets'])
+            for entry in ret['rets']:
+                content += entry['title'] + '\n'
+            sendMail.sendMail(ret['email'], content)
             time.sleep(1)
    
 
@@ -44,13 +47,44 @@ class DownloadService():
             "max_downloads": 1
         }
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-            res = { 'email':name,'rets':None}
-            try:
-                res['rets'] = ydl.extract_info(url, force_generic_extractor=ydl.params.get(
-                    'force_generic_extractor', False))
-                
-            except MaxDownloadsReached:
-                ydl.to_screen('[info] Maximum number of downloaded files reached.')
+            res = {'email': name, 'rets': None}
+            # res['rets'] = ydl.extract_info(url, force_generic_extractor=ydl.params.get(
+            #     'force_generic_extractor', False))
+            ies = ydl._ies
+            for ie in ies:
+                if not ie.suitable(url):
+                    continue
+                ie = ydl.get_info_extractor(ie.ie_key())
+                if not ie.working():
+                    ydl.report_warning('The program functionality for this site has been marked as broken, '
+                                    'and will probably not work.')
+                try:
+                    ie_result = ie.extract(url)
+                    if ie_result is None:
+                        break
+                    if isinstance(ie_result, list):
+                        ie_result = {
+                            '_type': 'compat_list',
+                            'entries': ie_result,
+                        }
+                    ydl.add_default_extra_info(ie_result, ie, url)
+                    ie_entries = ie_result['entries']
+                    res['rets'] = list(itertools.islice(
+                            ie_entries, 0, None))  
+                    ydl.process_ie_result(ie_result, True, {})
+                    break
+                except GeoRestrictedError as e:
+                    break
+                except ExtractorError as e:  # An error we somewhat expected
+                    break
+                except MaxDownloadsReached:
+                    ydl.to_screen(
+                        '[info] Maximum number of downloaded files reached.')
+                except Exception as e:
+                    if ydl.params.get('ignoreerrors', False):
+                        break
+                    else:
+                        raise
         return res
 
     def submitDownloadTask(self, site, url, keyword, useremail):

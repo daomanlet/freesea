@@ -14,8 +14,10 @@ class EmailService():
     def __init__(self):
         pass
 
-    def sendMail(self, receiver_email, message):
-        content = '下载完成啦，请下载seafile app, 按照如下url连接您的网盘，用户名密码与您注册的一致'
+    def sendMail(self, receiver_email, content):
+        if receiver_email is None
+            return
+        content = content + '\n下载完成啦，请下载seafile app, 按照如下url连接您的网盘，用户名密码与您注册的一致'
         message = MIMEText(content, 'plain', 'utf-8')
 
         message['From'] = Header("自由海管理员", 'utf-8')
