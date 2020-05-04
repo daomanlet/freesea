@@ -50,37 +50,15 @@ def testDownload():
                         'entries': ie_result,
                     }
                 ydl.add_default_extra_info(ie_result, ie, url)
-                playlistitems_str = ydl.params.get('playlist_items')
-                playlistitems = None
-                # if playlistitems_str is not None:
-                #     def iter_playlistitems(format):
-                #         for string_segment in format.split(','):
-                #             if '-' in string_segment:
-                #                 start, end = string_segment.split('-')
-                #                 for item in range(int(start), int(end) + 1):
-                #                     yield int(item)
-                #             else:
-                #                 yield int(string_segment)
-                #     playlistitems = orderedSet(iter_playlistitems(playlistitems_str))
-
-                # def make_playlistitems_entries(list_ie_entries):
-                #     num_entries = len(list_ie_entries)
-                #     return [
-                #             list_ie_entries[i - 1] for i in playlistitems
-                #             if -num_entries <= i - 1 < num_entries]
-                # # entries = make_playlistitems_entries(ie_entries)
                 ie_entries = ie_result['entries']
-                # entries = make_playlistitems_entries(list(itertools.islice(
-                #       ie_entries, 0, max(playlistitems))))
-                entries = list(itertools.islice(
-                        ie_entries, 0, None))                                
-                res['rets'] = ydl.process_ie_result(ie_result, True, {})
+                res['rets'] = list(itertools.islice(
+                        ie_entries, 0, None))  
+                ydl.process_ie_result(ie_result, True, {})
             except GeoRestrictedError as e:
                 break
             except ExtractorError as e:  # An error we somewhat expected
                 break
             except MaxDownloadsReached:
-                res['rets'] = ydl.process_ie_result(ie_result, True, {})
                 ydl.to_screen(
                     '[info] Maximum number of downloaded files reached.')
             except Exception as e:

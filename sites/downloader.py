@@ -21,8 +21,8 @@ class DownloadService():
         for site in siteconfig.SitesAvailable:
             executor = ThreadPoolExecutor(max_workers=site['thread_pool_size'])
             self._domainExecutor[site['name']]=executor
-            _thread = threading.Thread(target=DownloadService.dealDownloadResults, daemon=True)
-            _thread.start()
+        _thread = threading.Thread(target=DownloadService.dealDownloadResults, args={self}, daemon=True)
+        _thread.start()
 
     def dealDownloadResults(self):
         while True:
@@ -56,7 +56,7 @@ class DownloadService():
     def submitDownloadTask(self, site, url, keyword, useremail):
         executor = self._domainExecutor[site]
         try:
-            args = [url, keyword, useremail]
+            args = [self, url, keyword, useremail]
             future = executor.submit(lambda p: DownloadService.downloadThread(*p),args)
             self._rets.put(future)
         except Exception as ex:

@@ -15,12 +15,14 @@ from app.webdav import WebDAV
 from app.email import EmailService
 from app import app, db
 from sites import siteconfig
+from sites.downloader import DownloadService
 from concurrent.futures import ThreadPoolExecutor
 import threading, queue
 import time
 
-domainExecutor = {}
-rets = queue.Queue()
+# domainExecutor = {}
+# rets = queue.Queue()
+_downloadSrv = None 
 
 @app.route('/downloads', methods=['GET'])
 def get_downloads():
@@ -64,7 +66,7 @@ def dark_search():
         url = "https://www.youtube.com/results?search_query="+keyword
         site= 'youtube'        
         ##url = "https://cn.pornhub.com/video/search?search="+keyword
-    executor = domainExecutor[site]
+    # executor = domainExecutor[site]
     name = ""
     if current_user.is_authenticated:
         name = current_user.email
@@ -80,13 +82,14 @@ def dark_search():
                 "xvfb": ''
             }
         imgkit.from_url(url, filename, options=options)
-        try:
-            args = [url, keyword, name]
-            future = executor.submit(lambda p: downloadThread(*p),args)
-            rets.put(future)
-        except Exception as ex:
-            print(ex)
-            traceback.print_exc()
+        # try:
+        #     args = [url, keyword, name]
+        #     future = executor.submit(lambda p: downloadThread(*p),args)
+        #     rets.put(future)
+        # except Exception as ex:
+        #     print(ex)
+        #     traceback.print_exc()
+        _downloadSrv.submitDownloadTask(site,url,keyword,name)
     return send_file(filename, mimetype='image/jpg')
 
 
@@ -135,23 +138,25 @@ def root():
     return render_template('index.html', title='Home')
 
 
-def dealDownloadResults():
-    while True:
-        future = rets.get()
-        ret = future.result()
-        print(ret)
-        sendMail = EmailService()
-        sendMail.sendMail(ret['email'], ret['rets'])
-        time.sleep(1)
+# def dealDownloadResults():
+#     while True:
+#         future = rets.get()
+#         ret = future.result()
+#         print(ret)
+#         sendMail = EmailService()
+#         sendMail.sendMail(ret['email'], ret['rets'])
+#         time.sleep(1)
     
 if __name__ == '__main__':
     db.create_all()
-    for site in siteconfig.SitesAvailable:
-        executor = ThreadPoolExecutor(max_workers=site['thread_pool_size'])
-        domainExecutor[site['name']]=executor
+    _downloadSrv = DownloadService()
+    # for site in siteconfig.SitesAvailable:
+    #     executor = ThreadPoolExecutor(max_workers=site['thread_pool_size'])
+    #     domainExecutor[site['name']]=executor
         
-    thread = threading.Thread(target=dealDownloadResults, daemon=True)
-    thread.start()
+    # thread = threading.Thread(target=dealDownloadResults, daemon=True)
+    # thread.start()
     app.run(host='127.0.0.1',
             port=7777, debug=True)
-    thread._stop()
+    # thread._stop()
+    _downloadSrv.shutdown()
