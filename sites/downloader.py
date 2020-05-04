@@ -31,20 +31,23 @@ class DownloadService():
             ret = future.result()
             print(ret)
             sendMail = EmailService()
+            i = 1
             for entry in ret['rets']:
-                content += entry['title'] + '\n'
+                content += str(i) + '. ' + entry['title'] + '\n'
+                i += 1
             sendMail.sendMail(ret['email'], content)
             time.sleep(1)
    
 
-    def downloadThread(self, url, keyword, name):
+    def downloadThread(self, site, url, keyword, name):
+        siteConfig = siteconfig.findAvailableSiteConfigure(site)
         path = os.path.join(os.path.join(Config.VIDEO_WEBDAV, name), keyword)
         Path(path).mkdir(parents=True, exist_ok=True)
         ydl_opts = {
             'outtmpl': os.path.join(path, "%(title)s.%(ext)s"),
             'writesubtitles': True,
             'writethumbnail': True,
-            "max_downloads": 1
+            "max_downloads": siteConfig['max_download']
         }
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             res = {'email': name, 'rets': None}
@@ -52,7 +55,7 @@ class DownloadService():
             #     'force_generic_extractor', False))
             ies = ydl._ies
             for ie in ies:
-                if not ie.suitable(url):
+                if not ie.suitable(url) or ie.IE_NAME == 'generic':
                     continue
                 ie = ydl.get_info_extractor(ie.ie_key())
                 if not ie.working():
@@ -80,17 +83,15 @@ class DownloadService():
                 except MaxDownloadsReached:
                     ydl.to_screen(
                         '[info] Maximum number of downloaded files reached.')
+                    break
                 except Exception as e:
-                    if ydl.params.get('ignoreerrors', False):
-                        break
-                    else:
-                        raise
+                    continue
         return res
 
     def submitDownloadTask(self, site, url, keyword, useremail):
         executor = self._domainExecutor[site]
         try:
-            args = [self, url, keyword, useremail]
+            args = [self, site, url, keyword, useremail]
             future = executor.submit(lambda p: DownloadService.downloadThread(*p),args)
             self._rets.put(future)
         except Exception as ex:

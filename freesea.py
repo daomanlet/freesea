@@ -66,14 +66,12 @@ def dark_search():
         url = "https://www.youtube.com/results?search_query="+keyword
         site= 'youtube'        
         ##url = "https://cn.pornhub.com/video/search?search="+keyword
-    # executor = domainExecutor[site]
     name = ""
     if current_user.is_authenticated:
         name = current_user.email
     userfolder = os.path.join(Config.IMG_CACHE, name)
     Path(userfolder).mkdir(parents=True, exist_ok=True)
     filename = os.path.join(userfolder, str(uuid.uuid4())+site+'.jpg')
-    ##filename = str(uuid.uuid4())+'.jpg'
     if not os.path.exists(filename):
         options = {}
         if os.name != 'nt':
@@ -82,14 +80,7 @@ def dark_search():
                 "xvfb": ''
             }
         imgkit.from_url(url, filename, options=options)
-        # try:
-        #     args = [url, keyword, name]
-        #     future = executor.submit(lambda p: downloadThread(*p),args)
-        #     rets.put(future)
-        # except Exception as ex:
-        #     print(ex)
-        #     traceback.print_exc()
-        _downloadSrv.submitDownloadTask(site,url,keyword,name)
+        _downloadSrv.submitDownloadTask(site, url, keyword, name)
     return send_file(filename, mimetype='image/jpg')
 
 

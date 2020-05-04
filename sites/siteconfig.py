@@ -3,11 +3,13 @@ SitesAvailable = [
         'name':'youtube',
         'thread_pool_size' : 1,
         'search_url':'https://www.youtube.com/results?search_query=',
+        'max_download':3
     },
     {
         'name':'pornhub',
         'thread_pool_size' : 1,
         'search_url':'https://cn.pornhub.com/video/search?search=',
+        'max_download':2
     }
 ]
 
