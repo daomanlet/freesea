@@ -17,7 +17,7 @@ class Config(object):
     VIDEO_WEBDAV = os.path.join(basedir, 'video')
     ## for seafile webdav server
     REMOTE_STORAGE_URL = 'http://192.168.2.22'
-    REMOTE_STORAGE_USER = 'xiazheny@gmail.com'
+    REMOTE_STORAGE_USER = 'xxxxxx@gmail.com'
     REMOTE_STORAGE_PWD = 'Welcome1'
     
     # community edition using default share library to make other users check download files
@@ -26,5 +26,5 @@ class Config(object):
     #SMTP Server
     SMTP_SERVER = 'smtp.qq.com'
     SMTP_SERVER_PORT = 465
-    ADMIN_EMAIL = '1814533739@qq.com'
+    ADMIN_EMAIL = 'xxxxxx@qq.com'
     ADMIN_EMAIL_PASSCODE = 'xxxxx'
