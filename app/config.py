@@ -27,4 +27,4 @@ class Config(object):
     SMTP_SERVER = 'smtp.qq.com'
     SMTP_SERVER_PORT = 465
     ADMIN_EMAIL = '1814533739@qq.com'
-    ADMIN_EMAIL_PASSCODE = 'oqqnkspayvhxefib'
+    ADMIN_EMAIL_PASSCODE = 'xxxxx'
