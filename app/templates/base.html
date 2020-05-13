@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <title>{{ title }} - Dark Site</title>
+    <title>{{ title }} - FreeSea</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/static/index.css">
@@ -11,33 +11,73 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
     <script src="/static/js/rest.js"></script>
+    <!-- Font Awesome JS -->
+    <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/solid.js" integrity="sha384-tzzSw1/Vo+0N5UhStP3bvwWPq+uvzCMfrN1fEFe+xBmv1C/AtVX5K0uZtmcHitFZ" crossorigin="anonymous"></script>
+    <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/fontawesome.js" integrity="sha384-6OIrr52G08NpOFSZdxxz1xdNSndlD4vdcf/q2myIUVO0VsqaGHJsB0RaBE01VTOY" crossorigin="anonymous"></script>
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item active">
-                    <a class="nav-link" href="/index">首页<span class="sr-only"></span></a>
+    <!-- Side Navigation Menu -->
+    <div class="wrapper">
+        <!-- Sidebar  -->
+        <nav id="sidebar">
+            <div id="dismiss">
+                <i class="fas fa-arrow-left"></i>
+            </div>
+            <div class="sidebar-header">
+                <h3>自由海</h3>
+            </div>
+            <ul class="list-unstyled components">
+                <li class='active'>
+                    <a href="/index">首页</a>
                 </li>
-                <li class="nav-item">
+                <li>
                     {% if current_user.is_anonymous %}
-                    <a class="nav-link" href="/login">登录</a>
-                    {% else %}
-                    <a class="nav-link" href="/logout">{{ current_user.email }} 登出</a>
-                    {% endif %}
+                    <a href="/login">登录</a> {% else %}
+                    <a href="/logout">{{ current_user.email }} 登出</a> {% endif %}
                 </li>
                 {% if current_user.is_anonymous %}
-                <li class="nav-item">
-                    <a class="nav-link" href="/register">注册</a>
+                <li>
+                    <a href="/register">注册</a>
                 </li>
                 {% endif %}
+                <li>
+                    <a href="#">关于</a>
+                </li>
             </ul>
-        </div>
-    </nav>
-    <div class="container">
-        <hr>
-        {% block content %}{% endblock %}</div>
+        </nav>
+        <div class="container" id='main'>
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                <div class="container">
+                    <button type="button" id="sidebarCollapse" class="btn btn-info">
+                        <i class="fas fa-align-left"></i>
+                        <span>FS</span>
+                    </button>
+                </div>
+            </nav>
+            <hr> {% block content %}{% endblock %}</div>
+        <div class="overlay"></div>
+        <!-- jQuery Custom Scroller CDN -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.concat.min.js"></script>
+        <script>
+            $(document).ready(function() {
+                $("#sidebar").mCustomScrollbar({
+                    theme: "minimal"
+                });
+
+                $('#dismiss, .overlay').on('click', function() {
+                    $('#sidebar').removeClass('active');
+                    $('.overlay').removeClass('active');
+                });
+
+                $('#sidebarCollapse').on('click', function() {
+                    $('#sidebar').addClass('active');
+                    $('.overlay').addClass('active');
+                    $('.collapse.in').toggleClass('in');
+                    $('a[aria-expanded=true]').attr('aria-expanded', 'false');
+                });
+            });
+        </script>
 </body>
 
 </html>

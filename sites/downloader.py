@@ -1,4 +1,4 @@
-import os
+import os, sys, traceback
 import time
 import threading, queue
 import youtube_dl
@@ -33,7 +33,10 @@ class DownloadService():
             sendMail = EmailService()
             i = 1
             for entry in ret['rets']:
-                content += str(i) + '. ' + entry['title'] + '\n'
+                try:
+                    content += str(i) + '. ' + entry['title'] + '\n'
+                except:
+                    traceback.print_exc(file=sys.stdout)
                 i += 1
             sendMail.sendMail(ret['email'], content)
             time.sleep(1)
