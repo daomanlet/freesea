@@ -10,11 +10,6 @@
     SIDEBAR STYLE
 ----------------------------------------------------- */
 
-
-/* ---------------------------------------------------
-    SIDEBAR STYLE
------------------------------------------------------ */
-
 #sidebar {
     width: 250px;
     position: fixed;
@@ -22,8 +17,8 @@
     left: -250px;
     height: 100vh;
     z-index: 999;
-    background: #7386D5;
-    color: #fff;
+    background: #343a40;
+    color: #ffc107;
     transition: all 0.3s;
     overflow-y: scroll;
     box-shadow: 3px 3px 3px rgba(0, 0, 0, 0.2);
@@ -38,7 +33,7 @@
     height: 35px;
     line-height: 35px;
     text-align: center;
-    background: #7386D5;
+    background: #343a40;
     position: absolute;
     top: 10px;
     right: 10px;
@@ -49,8 +44,8 @@
 }
 
 #dismiss:hover {
-    background: #fff;
-    color: #7386D5;
+    background: #343a40;
+    color: #fd7e14;
 }
 
 .overlay {
@@ -71,34 +66,35 @@
 
 #sidebar .sidebar-header {
     padding: 20px;
-    background: #6d7fcc;
+    background: #495057;
 }
 
 #sidebar ul.components {
     padding: 20px 0;
-    border-bottom: 1px solid #47748b;
+    border-bottom: 1px solid #fd7e14;
 }
 
 #sidebar ul p {
-    color: #fff;
+    color: #fd7e14;
     padding: 10px;
 }
 
 #sidebar ul li a {
+    color: #ffc107;
     padding: 10px;
     font-size: 1.1em;
     display: block;
 }
 
 #sidebar ul li a:hover {
-    color: #7386D5;
-    background: #fff;
+    color: #343a40;
+    background: #fd7e14;
 }
 
 #sidebar ul li.active>a,
 a[aria-expanded="true"] {
-    color: #fff;
-    background: #6d7fcc;
+    color: #343a40;
+    background: #fd7e14;
 }
 
 a[data-toggle="collapse"] {
@@ -116,7 +112,7 @@ a[data-toggle="collapse"] {
 ul ul a {
     font-size: 0.9em !important;
     padding-left: 30px !important;
-    background: #6d7fcc;
+    background: #fd7e14;
 }
 
 ul.CTAs {
@@ -133,11 +129,11 @@ ul.CTAs a {
 
 a.download {
     background: #fff;
-    color: #7386D5;
+    color: #fd7e14;
 }
 
 a.article,
 a.article:hover {
-    background: #6d7fcc !important;
+    background: #fd7e14 !important;
     color: #fff !important;
 }

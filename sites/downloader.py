@@ -54,8 +54,7 @@ class DownloadService():
         }
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             res = {'email': name, 'rets': None}
-            # res['rets'] = ydl.extract_info(url, force_generic_extractor=ydl.params.get(
-            #     'force_generic_extractor', False))
+            youtube_dl.utils.std_headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36'
             ies = ydl._ies
             for ie in ies:
                 if not ie.suitable(url) or ie.IE_NAME == 'generic':

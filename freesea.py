@@ -20,39 +20,8 @@ from concurrent.futures import ThreadPoolExecutor
 import threading, queue
 import time
 
-# domainExecutor = {}
-# rets = queue.Queue()
 _downloadSrv = None 
-
-@app.route('/downloads', methods=['GET'])
-def get_downloads():
-    url = request.args.get('url')
-    ydl_opts = {}
-    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        res = ydl.extract_info(url, force_generic_extractor=ydl.params.get(
-            'force_generic_extractor', False))
-    return json.dumps(res)
-
-
-def downloadThread(url, keyword, name):
-    path = os.path.join(os.path.join(Config.VIDEO_WEBDAV, name), keyword)
-    Path(path).mkdir(parents=True, exist_ok=True)
-    ydl_opts = {
-        'outtmpl': os.path.join(path, "%(title)s.%(ext)s"),
-        'writesubtitles': True,
-        'writethumbnail': True,
-        "max_downloads": 1
-    }
-    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        res = { 'email':name,'rets':None}
-        try:
-            res['rets'] = ydl.extract_info(url, force_generic_extractor=ydl.params.get(
-                'force_generic_extractor', False))
-            
-        except MaxDownloadsReached:
-            ydl.to_screen('[info] Maximum number of downloaded files reached.')
-    return res
-
+_webDav = None
 
 @app.route('/search', methods=['GET'])
 def dark_search():
@@ -101,6 +70,7 @@ def login():
             flash('Invalid username or password')
             return redirect(url_for('login'))
         login_user(user, remember=form.remember_me.data)
+        _webDav = WebDAV()
         return redirect('/index')
     return render_template('login.html', title='Sign In', form=form)
 
@@ -122,32 +92,54 @@ def user_register():
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
 
+@app.route("/about", methods=["GET", "POST"])
+def getAbout():
+    if current_user.is_authenticated:
+        name = current_user.email
+    else:
+        name = 'xxx@qq.com'    
+    config = {}
+    config['webdavurl'] = Config.REMOTE_STORAGE_URL
+    config['name'] = name
+    return render_template('about.html', title='Register', conf=config)
+
+@app.route("/filelist", methods=["GET", "POST"])
+def list_file():
+    if current_user.is_authenticated:
+        name = current_user.email
+    else:
+        return redirect(url_for('login'))    
+    userfolder = os.path.join(Config.VIDEO_WEBDAV, name)
+    files = []
+    for root, dirs, fps in os.walk(userfolder):    
+        for path in dirs:
+            tag = path
+            fullpath = os.path.join(userfolder,path)
+            for file in os.listdir(os.path.join(userfolder,path)):
+                if file.endswith(".jpg"):
+                    temp = {}
+                    temp['tag'] = tag
+                    temp['img'] = "/"+os.path.basename(Config.VIDEO_WEBDAV)+"/"+name+"/"+file
+                    temp['title'] = os.path.splitext(file)[0]
+                    mediafile = os.path.join(fullpath, temp['title']+'.mp4')
+                    if os.path.exists(mediafile):
+                        temp['link'] = "/"+os.path.basename(Config.VIDEO_WEBDAV)+"/"+name+"/"+temp['title']+'.mp4'
+                        files.append(temp)
+                    else:
+                        mediafile = os.path.join(fullpath, temp['title']+'.mkv')
+                        if os.path.exists(mediafile):
+                            temp['link'] = "/"+os.path.basename(Config.VIDEO_WEBDAV)+"/"+name+"/"+temp['title']+'.mkv'
+                        files.append(temp)
+    return render_template('filelist.html', title='Files', files=files)
 
 @app.route('/')
 @app.route('/index')
 def root():
     return render_template('index.html', title='Home')
 
-
-# def dealDownloadResults():
-#     while True:
-#         future = rets.get()
-#         ret = future.result()
-#         print(ret)
-#         sendMail = EmailService()
-#         sendMail.sendMail(ret['email'], ret['rets'])
-#         time.sleep(1)
-    
 if __name__ == '__main__':
     db.create_all()
     _downloadSrv = DownloadService()
-    # for site in siteconfig.SitesAvailable:
-    #     executor = ThreadPoolExecutor(max_workers=site['thread_pool_size'])
-    #     domainExecutor[site['name']]=executor
-        
-    # thread = threading.Thread(target=dealDownloadResults, daemon=True)
-    # thread.start()
     app.run(host='0.0.0.0',
             port=7777, debug=True)
-    # thread._stop()
     _downloadSrv.shutdown()

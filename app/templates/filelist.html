@@ -1,0 +1,20 @@
+{% extends "base.html" %} {% block content %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th class="col-6">文件名</th>
+            <th class="col-3">标签</th>
+            <th class="col-3">下载</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for file in files %}
+        <tr>
+            <td class="col-6">{{file.title}}</td>
+            <td class="col-3">{{file.tag}}</td>
+            <td class="col-3"><a href='/about'>下载</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
