@@ -1,30 +1,54 @@
 {% extends "base.html" %} {% block content %}
 <div class="row mb-1">
-    <div class="col-lg-8 mx-auto">
-        <div class="p-1 bg-light rounded rounded-pill shadow-sm mb-4">
-            <div class="input-group">
-                <div class="input-group-btn search-panel">
-                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" id="domainbutton">
+    <div class='col-sm-1'></div>
+    <div class="p-1 bg-light rounded rounded-pill shadow-sm mb-1 col-sm-10">
+        <div class="input-group">
+            <div class="input-group-btn search-panel col-sm-2">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" id="domainbutton">
                         油管
                       </button>
-                    <div class="dropdown-menu" id="domainlist">
-                        <a class="dropdown-item" href="#">油管</a>
-                        <a class="dropdown-item" href="#">P站</a>
-                    </div>
+                <div class="dropdown-menu col-sm-10" id="domainlist">
+                    <a class="dropdown-item" href="#">油管</a>
+                    <a class="dropdown-item" href="#">P站</a>
                 </div>
-                <input type="text" placeholder="订阅关键字" class="form-control border-0 bg-light" onkeydown="search(this)">
             </div>
+            <input type="text" placeholder="订阅关键字" class="form-control border-0 bg-light" onkeydown="search(this)">
         </div>
     </div>
+    <div class='col-sm-1'></div>
 </div>
 <div class="row mb-1">
-    <div class="col-sm-8 mx-auto">
+    <div class='col-sm-1'></div>
+    <div class="col-sm-10 mx-auto">
         <div class="hidden" id='progressbar'>
             <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 75%"></div>
         </div>
     </div>
+    <div class='col-sm-1'></div>
 </div>
-<div class="row mb-2">
+<div class="container" id='search_result'>
+    <!-- <div class="row mb-1">
+        <div class='col-sm-1'></div>
+        <div class="col-sm-10">
+            <div class='row mb-1 bg-light'>
+                <div class="col-sm-8"><span class='mb-1  text-info'>题目</span></div>
+                <div class="col-sm-2"><span class='float-right'>详细</span></div>
+            </div>
+        </div>
+        <div class='col-sm-1'></div>
+    </div>
+    <div class="row mb-1">
+        <div class='col-sm-1'></div>
+        <div class="col-sm-10">
+            <div class='row mb-1 bg-light'>
+                <div class="col-sm-8"><span class='mb-1'>题目</span></div>
+                <div class="col-sm-2"><span class='mb-1'>详细</span></div>
+            </div>
+        </div>
+        <div class='col-sm-1'></div>
+    </div> -->
+</div>
+<div class="row mb-1">
     <div class="col-lg-8 mx-auto">
         <div id="demo" class="carousel slide" data-ride="carousel">
             <!-- The slideshow -->

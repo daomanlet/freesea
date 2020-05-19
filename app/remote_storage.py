@@ -36,9 +36,9 @@ class RemoteStorageWebDAV(RemoteStorage):
 
 class RemoteStorageSeafile(RemoteStorage):
 
-    _client = seafileapi.connect(Config.REMOTE_STORAGE_URL,
-                                 Config.REMOTE_STORAGE_USER,
-                                 Config.REMOTE_STORAGE_PWD)
+    # _client = seafileapi.connect(Config.REMOTE_STORAGE_URL,
+    #                              Config.REMOTE_STORAGE_USER,
+    #                              Config.REMOTE_STORAGE_PWD)
 
     _repo_id = None
     _token = None

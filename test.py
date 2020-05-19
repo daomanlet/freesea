@@ -1,25 +1,63 @@
 from app.remote_storage import RemoteStorage
 from app.webdav import WebDAV
 from app.email import EmailService
+from app.config import Config
+from sites import siteconfig
+from sites.downloader import DownloadService
 import sys
 import youtube_dl
 from youtube_dl.utils import MaxDownloadsReached, ExtractorError, GeoRestrictedError, orderedSet
 import os
 import itertools
-
+from pathlib import Path
 
 def testWebdavStorage():
     webdav = WebDAV()
     ret = webdav.addUser('xia_zheny@hotmail.com', 'Welcome1')
     print(ret)
 
+def testDownloadRedirect():
+    path = os.path.join(os.path.join(Config.VIDEO_WEBDAV, "xia_zhenyu@hotmail.com"), "徐克")
+    Path(path).mkdir(parents=True, exist_ok=True)
+    srv = DownloadService()
+    srv.downloadVideo('https://cn.pornhub.com/view_video.php?viewkey=ph5e6ef9a6c3d18',path,True)
 
 def testEmail():
     email = EmailService()
     email.sendMail('xia_zhenyu@hotmail.com', '中文内容')
 
+def testDownloadPornHub():
+    path = os.path.join(os.path.join(Config.VIDEO_WEBDAV, "xia_zhenyu@hotmail.com"), "徐克")
+    Path(path).mkdir(parents=True, exist_ok=True)
+    srv = DownloadService()
+    res = srv.extractSearchSubscription('https://cn.pornhub.com/video/search?search=%E9%9F%A9%E5%9B%BD','xia_zhenyu@hotmail.com')
+    ret = srv.extractPlayListDetail(res['rets'], 10, './', False)
+    ret = srv.extractPlayListDetail(res['rets'], 1, './', True)
+    print(ret)
 
-def testDownload():
+def testDownloadYoutube():
+    # ydl_opts = {
+    #     'outtmpl': os.path.join('./', "%(title)s.%(ext)s"),
+    #     'writesubtitles': True,
+    #     'writethumbnail': True,
+    #     "max_downloads": 1
+    # }
+    # url = 'https://www.youtube.com/results?search_query=%E5%BE%90%E5%85%8B'
+    # with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+    #     ret = ydl.extract_info(url)
+    path = os.path.join(os.path.join(Config.VIDEO_WEBDAV, "xia_zhenyu@hotmail.com"), "徐克")
+    Path(path).mkdir(parents=True, exist_ok=True)
+    
+    srv = DownloadService()
+    res = srv.extractSearchSubscription('https://www.youtube.com/results?search_query=%E5%BE%90%E5%85%8B','xia_zhenyu@hotmail.com')
+    ret = srv.extractPlayListDetail(res['rets'], 10, './', False)
+    ret = srv.extractPlayListDetail(res['rets'], 1, './', True)
+
+    print(ret)
+    return
+
+
+def testDownloadDetail():
     name = 'xia_zhenyu@hotmail.com'
     url = 'https://www.youtube.com/results?search_query=%E5%BE%90%E5%85%8B'
     ydl_opts = {
@@ -52,7 +90,7 @@ def testDownload():
                 ydl.add_default_extra_info(ie_result, ie, url)
                 ie_entries = ie_result['entries']
                 res['rets'] = list(itertools.islice(
-                        ie_entries, 0, None))  
+                    ie_entries, 0, None))
                 ydl.process_ie_result(ie_result, True, {})
             except GeoRestrictedError as e:
                 break
@@ -70,4 +108,5 @@ def testDownload():
 
 
 if __name__ == '__main__':
-    testDownload()
+    #testDownloadPornHub()
+    testDownloadRedirect()
