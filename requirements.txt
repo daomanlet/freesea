@@ -20,6 +20,7 @@ Flask-Login==0.5.0
 Flask-Migrate==2.5.3
 Flask-SQLAlchemy==2.4.1
 Flask-WTF==0.14.3
+gunicorn==20.0.4
 idna==2.9
 imageio==2.8.0
 imageio-ffmpeg==0.4.1
@@ -52,7 +53,9 @@ SQLAlchemy==1.3.16
 sqlparse==0.3.1
 tqdm==4.45.0
 urllib3==1.25.9
+uWSGI==2.0.18
 Werkzeug==1.0.1
+wkhtmltopdf==0.2
 WsgiDAV==3.0.3
 WTForms==2.3.1
 youtube-dl==2020.3.24
