@@ -16,7 +16,7 @@ from flask import (
     flash,
     jsonify,
     session,
-    abort,
+    abort, g,
     send_from_directory)
 from flask_login import current_user, login_user, logout_user
 import youtube_dl
@@ -26,7 +26,7 @@ from app.models import User
 from app.forms import LoginForm, RegistrationForm
 from app.webdav import WebDAV
 from app.email import EmailService
-from app import app, db
+from app import app, db, create_app, downloader
 from sites import siteconfig
 from sites.downloader import DownloadService
 from concurrent.futures import ThreadPoolExecutor
@@ -35,9 +35,6 @@ import queue
 import time
 import itertools
 import re
-
-_downloadSrv = None
-_webDav = None
 
 
 @app.route('/search', methods=['GET'])
@@ -66,7 +63,7 @@ def dark_search():
                 "xvfb": ''
             }
         imgkit.from_url(url, filename, options=options)
-#        _downloadSrv.submitDownloadTask(site, url, keyword, name)
+#        app.get_download_service.submitDownloadTask(site, url, keyword, name)
     return send_file(filename, mimetype='image/jpg')
 
 
@@ -87,7 +84,7 @@ def download():
         name = current_user.email
     userfolder = os.path.join(Config.VIDEO_WEBDAV, name)
     Path(userfolder).mkdir(parents=True, exist_ok=True)
-    ie_result = _downloadSrv.downloadVideo(url, userfolder, True)
+    ie_result = downloader.downloadVideo(url, userfolder, True)
     fileName = ie_result['title']+'.mp4'
     try:
         return send_from_directory(userfolder, filename=fileName, as_attachment=True)
@@ -136,7 +133,7 @@ def stream():
         name = current_user.email
     userfolder = os.path.join(Config.VIDEO_WEBDAV, name)
     Path(userfolder).mkdir(parents=True, exist_ok=True)
-    ie_result = _downloadSrv.downloadVideo(url, userfolder, True)
+    ie_result = downloader.downloadVideo(url, userfolder, True)
     fileName = os.path.join(userfolder, ie_result['title']+'.mp4')
     range_header = request.headers.get('Range', None)
     byte1, byte2 = 0, None
@@ -173,7 +170,7 @@ def getDetail():
         name = current_user.email
     userfolder = os.path.join(Config.VIDEO_WEBDAV, name)
     Path(userfolder).mkdir(parents=True, exist_ok=True)
-    ret = _downloadSrv.downloadVideo(url, userfolder)
+    ret = downloader.downloadVideo(url, userfolder)
     return jsonify(ret), 200
 
 
@@ -192,7 +189,7 @@ def getSubscribeList():
     name = ""
     if current_user.is_authenticated:
         name = current_user.email
-    future = _downloadSrv.submitSubscribeTask(url, 'youtube', name)
+    future = downloader.submitSubscribeTask(url, 'youtube', name)
     ret = future.result()
     session['ie_result'] = ret
     return jsonify(list(itertools.islice(ret['rets']['entries'], 0, None))), 200
@@ -216,7 +213,9 @@ def login():
             return redirect(url_for('login'))
         login_user(user, remember=form.remember_me.data)
         try:
-            _webDav = WebDAV()
+            if session['webdav'] is not None:
+                session.pop('webdav')
+            session['webdav'] = webDav 
         except:
             pass
         return redirect('/index')
@@ -297,8 +296,6 @@ def root():
 
 
 if __name__ == '__main__':
-    db.create_all()
-    _downloadSrv = DownloadService()
+    app = create_app()
     app.run(host='0.0.0.0', threaded=True,
             port=7777, debug=True)
-    _downloadSrv.shutdown()
