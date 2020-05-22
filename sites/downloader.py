@@ -58,6 +58,7 @@ class DownloadService():
         ydl_opts = {
             'outtmpl': fileName,
             'writesubtitles': True,
+            'format': 'mp4',
             'writethumbnail': True
         }
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
@@ -200,7 +201,10 @@ class DownloadService():
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             res = {'email': user_name, 'rets': None}
             youtube_dl.utils.std_headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36'
-            res['rets'] = ydl.extract_info(url, download=False, process=True)
+            if 'youtube' in url:
+                res['rets'] = ydl.extract_info(url, download=False, process=True)
+            else:
+                res['rets'] = ydl.extract_info(url, download=False, process=False)
         return res
 
     def submitSubscribeTask(self, url, site, user_name):

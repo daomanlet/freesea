@@ -89,7 +89,8 @@ def download():
     try:
         return send_from_directory(userfolder, filename=fileName, as_attachment=True)
     except FileNotFoundError:
-        abort(404)
+        abort(200)
+
 
 def get_chunk(byte1, byte2, fileName):
     full_path = fileName
@@ -215,7 +216,7 @@ def login():
         try:
             if session['webdav'] is not None:
                 session.pop('webdav')
-            session['webdav'] = webDav 
+            session['webdav'] = webDav
         except:
             pass
         return redirect('/index')
@@ -242,6 +243,7 @@ def user_register():
         flash('Congratulations, you are now a registered user!')
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
+
 
 @app.route("/about", methods=["GET", "POST"])
 def getAbout():
