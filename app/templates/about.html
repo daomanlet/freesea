@@ -1,15 +1,24 @@
 {% extends "base.html" %} {% block content %}
-<h2>1 Freesea是一个连接网盘的应用,目前兼容seafile，所以您可以用网盘app访问您下载的内容</h2>
-<p><a href='http://seafile-downloads.oss-cn-shanghai.aliyuncs.com/seafile-2.2.25.apk'>seafile网盘app下载</a></p>
-<h2>2 配置网盘</h2>
-<li>点击添加账户<br><img src='/static/seafile-1.png' class="img-thumbnail" /></li>
-<li>点击添加其他seafile服务器<br><img src='/static/seafile-2.png' class="img-thumbnail" /></li>
-<li>写入freesea连接的网盘地址{{conf['webdavurl']}}</li>
-<li>写入您freesea的账号{{conf['name']}}</li>
-<li>写入您freesea的密码</br>
-    <img src='/static/seafile-3.png' class="img-thumbnail" /></li>
-<h2>2 Freesea 是一个连接网盘的应用,目前兼容seafile，所以您可以用网盘app访问您下载的内容</h2>
-<li><a href='https://hub.docker.com/repository/docker/rouynxia/freesea/tags?page=1'>freesea docker image下载</a></li>
-<li><a href='https://github.com/daomanlet/freesea'>freesea github</a> </li>
-
+<div row 'mb-2'>
+    <div class='col-sm-12'>
+        <h2>Freesea是下载视频工具</h2>
+    </div>
+</div>
+<div row 'mb-2'>
+    <div class='col-sm-2'></div>
+    <div class='col-sm-8'>
+        <p clas='text-info mb-2'>
+            <li>
+                freesea订阅可以定时下载需要视频，并进行跟踪，但是这需要独立IP去完成
+            </li>
+            <li>
+                用户可以自行申请海外虚拟机，并且通过开源代码安装freesea，<a href='https://github.com/daomanlet/freesea'>git 地址</a>即可完成订阅
+            </li>
+            <li>
+                通过git hub联系开发者也可以协助部署
+            </li>
+        </p>
+    </div>
+    <div class='col-sm-2'></div>
+</div>
 {% endblock %}

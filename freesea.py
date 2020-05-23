@@ -174,12 +174,27 @@ def getDetail():
     ret = downloader.downloadVideo(url, userfolder)
     return jsonify(ret), 200
 
+def subscribeChannel(url):
+    if 'channel' in url:
+        name = ""
+        if current_user.is_authenticated:
+            name = current_user.email
+        userfolder = os.path.join(Config.VIDEO_WEBDAV, name)
+        Path(userfolder).mkdir(parents=True, exist_ok=True)
+        ret = downloader.downloadVideo(url, userfolder)
+        return jsonify(ret),200
+    return 404
 
 @app.route('/subscribe', methods=['GET'])
 def getSubscribeList():
     site = 'youtube'
+    url = request.args.get('url')
+    if url is not None:
+        return subscribeChannel(url)
+
     keyword = request.args.get('keywords')
     site = request.args.get('domain')
+
     siteConfig = siteconfig.findAvailableSiteConfigure(site)
     if siteConfig is not None:
         url = siteConfig['search_url'] + keyword

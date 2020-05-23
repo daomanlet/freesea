@@ -65,10 +65,7 @@ function showSearchResult(ele) {
                         '&domain=' +
                         domain + "><span class='mb-1  text-warning'>点击下载</span></a>");
                 } else if (i <= 20) {
-                    c2 = $("<div class='col-sm-2'>").append("<a href=/download?id=" +
-                        obj['id'] +
-                        '&domain=' +
-                        domain + "><span class='mb-1  text-warning'>点击订阅</span></a>");
+                    c2 = $("<div class='col-sm-2'>").append("<a href='/about'><span class='mb-1  text-warning'>点击订阅</span></a>");
                 }
                 var row = $("<div/>").addClass("row mb-1");
                 row.append($("<div class='col-sm-1'/>"));
