@@ -6,50 +6,124 @@ from sites import siteconfig
 from sites.downloader import DownloadService
 import sys
 import youtube_dl
-from youtube_dl.utils import MaxDownloadsReached, ExtractorError, GeoRestrictedError, orderedSet
+from youtube_dl.utils import (
+    MaxDownloadsReached,
+    ExtractorError,
+    GeoRestrictedError,
+    orderedSet,
+    sanitize_url,
+    url_basename,
+    ISO3166Utils,
+    error_to_compat_str,
+    encode_compat_str,
+    compat_str,
+    PagedList)
 import os
+import random
 import itertools
+import time
+import traceback
+from flask import jsonify
 from pathlib import Path
+
 
 def testWebdavStorage():
     webdav = WebDAV()
     ret = webdav.addUser('xia_zheny@hotmail.com', 'Welcome1')
     print(ret)
 
+
 def testDownloadRedirect():
-    path = os.path.join(os.path.join(Config.VIDEO_WEBDAV, "xia_zhenyu@hotmail.com"), "徐克")
+    path = os.path.join(os.path.join(Config.VIDEO_WEBDAV,
+                                     "xia_zhenyu@hotmail.com"), "徐克")
     Path(path).mkdir(parents=True, exist_ok=True)
     srv = DownloadService()
-    srv.downloadVideo('https://cn.pornhub.com/view_video.php?viewkey=ph5e6ef9a6c3d18',path,True)
+    srv.downloadVideo(
+        'https://cn.pornhub.com/view_video.php?viewkey=ph5e6ef9a6c3d18', path, True)
+
 
 def testEmail():
     email = EmailService()
     email.sendMail('xia_zhenyu@hotmail.com', '中文内容')
 
+
+def selectExtractor(ies, url):
+    for ie in ies:
+        if ie.suitable(url):
+            return ie
+    return None
+
+
+def testYoutubeDL_youtube_channel():
+    ydl_opts = {
+    }
+    url = 'https://www.youtube.com/channel/UCoC47do520os_4DBMEFGg4A'
+    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        youtube_dl.utils.std_headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36'
+        extra_info = {}
+        download = False
+        ie = selectExtractor(ydl._ies, url)
+        if ie is None:
+            return None
+        ie = ydl.get_info_extractor(ie.ie_key())
+        if not ie.working():
+                ydl.report_warning('The program functionality for this site has been marked as broken, '
+                                   'and will probably not work.')
+        try:
+            ie_result = ie.extract(url)
+            if ie_result is None:
+                return None
+            ydl.add_default_extra_info(ie_result, ie, url)
+                # ydl.process_ie_result(ie_result)
+                # here the url type changed, so we hava to select extractor again
+            url = sanitize_url(ie_result['url'])
+            ie = selectExtractor(ydl._ies, ie_result['url'])
+            ie = ydl.get_info_extractor(ie.ie_key())
+            ie_result = ie.extract(url)
+            ie_entries = ie_result['entries']
+            entries = list(itertools.islice(ie_entries, 0, None))
+        except GeoRestrictedError as e:
+                msg = e.msg
+                if e.countries:
+                    msg += '\nThis video is available in %s.' % ', '.join(
+                        map(ISO3166Utils.short2full, e.countries))
+                msg += '\nYou might want to use a VPN or a proxy server (with --proxy) to workaround.'
+                ydl.report_error(msg)
+        except ExtractorError as e:  # An error we somewhat expected
+                ydl.report_error(compat_str(e), e.format_traceback())
+        except MaxDownloadsReached:
+                raise
+        except Exception as e:
+            if ydl.params.get('ignoreerrors', False):
+                ydl.report_error(error_to_compat_str(e), tb=encode_compat_str(traceback.format_exc()))
+                return None
+            else:
+                raise
+        assert(entries)
+        return 
+
+
 def testDownloadPornHub():
-    path = os.path.join(os.path.join(Config.VIDEO_WEBDAV, "xia_zhenyu@hotmail.com"), "徐克")
+    path = os.path.join(os.path.join(Config.VIDEO_WEBDAV,
+                                     "xia_zhenyu@hotmail.com"), "徐克")
     Path(path).mkdir(parents=True, exist_ok=True)
     srv = DownloadService()
-    res = srv.extractSearchSubscription('https://cn.pornhub.com/video/search?search=%E9%9F%A9%E5%9B%BD','xia_zhenyu@hotmail.com')
+    res = srv.extractSearchSubscription(
+        'https://cn.pornhub.com/video/search?search=%E9%9F%A9%E5%9B%BD', 'xia_zhenyu@hotmail.com')
     ret = srv.extractPlayListDetail(res['rets'], 10, './', False)
     ret = srv.extractPlayListDetail(res['rets'], 1, './', True)
     print(ret)
 
+
 def testDownloadYoutube():
-    # ydl_opts = {
-    #     'outtmpl': os.path.join('./', "%(title)s.%(ext)s"),
-    #     'writesubtitles': True,
-    #     'writethumbnail': True,
-    #     "max_downloads": 1
-    # }
-    # url = 'https://www.youtube.com/results?search_query=%E5%BE%90%E5%85%8B'
-    # with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-    #     ret = ydl.extract_info(url)
-    path = os.path.join(os.path.join(Config.VIDEO_WEBDAV, "xia_zhenyu@hotmail.com"), "徐克")
+    path = os.path.join(os.path.join(Config.VIDEO_WEBDAV,
+                                     "xia_zhenyu@hotmail.com"), "徐克")
     Path(path).mkdir(parents=True, exist_ok=True)
-    
+
     srv = DownloadService()
-    res = srv.extractSearchSubscription('https://www.youtube.com/results?search_query=%E5%BE%90%E5%85%8B','xia_zhenyu@hotmail.com')
+    # res = srv.extractSearchSubscription('https://www.youtube.com/results?search_query=%E5%BE%90%E5%85%8B','xia_zhenyu@hotmail.com')
+    res = srv.extractSearchSubscription(
+        'https://www.youtube.com/channel/UCoC47do520os_4DBMEFGg4A', 'xia_zhenyu@hotmail.com')
     ret = srv.extractPlayListDetail(res['rets'], 10, './', False)
     ret = srv.extractPlayListDetail(res['rets'], 1, './', True)
 
@@ -108,5 +182,7 @@ def testDownloadDetail():
 
 
 if __name__ == '__main__':
-    #testDownloadPornHub()
-    testDownloadRedirect()
+    # testDownloadPornHub()
+    # testDownloadRedirect()
+    # testDownloadYoutube()
+    testYoutubeDL_youtube_channel()

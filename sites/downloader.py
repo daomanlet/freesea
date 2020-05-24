@@ -5,17 +5,19 @@ import time
 import threading
 import queue
 import youtube_dl
-from youtube_dl.utils import PagedList
-from youtube_dl.utils import (
-    url_basename,
-)
-
 import random
 import itertools
 from sites import siteconfig
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from youtube_dl.utils import MaxDownloadsReached, ExtractorError, GeoRestrictedError, orderedSet
+from youtube_dl.utils import (
+    PagedList,
+    MaxDownloadsReached, 
+    ExtractorError, 
+    GeoRestrictedError, 
+    orderedSet,
+    url_basename,
+    ISO3166Utils)
 from app.config import Config
 from app.email import EmailService
 
@@ -56,6 +58,7 @@ class DownloadService():
         Path(path).mkdir(parents=True, exist_ok=True)
         fileName = os.path.join(path, "%(title)s.%(ext)s")
         ydl_opts = {
+            'sleep-interval':10,
             'outtmpl': fileName,
             'writesubtitles': True,
             'format': 'mp4',
@@ -71,7 +74,7 @@ class DownloadService():
             'outtmpl': os.path.join(path, "%(title)s.%(ext)s"),
             'writesubtitles': True,
             'writethumbnail': True,
-            'playlist_items': '2,3,7,10',
+            # 'playlist_items': '2,3,7,10',
             "max_downloads": max_downloads
         }
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
@@ -182,6 +185,7 @@ class DownloadService():
                         ydl.to_screen('[Extract] ' + reason)
                         continue
                     try:
+                        time.sleep(2000)
                         entry_result = ydl.process_ie_result(entry,
                                                              download=download,
                                                              extra_info=extra)
