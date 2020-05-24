@@ -55,52 +55,10 @@ def selectExtractor(ies, url):
 
 
 def testYoutubeDL_youtube_channel():
-    ydl_opts = {
-    }
-    url = 'https://www.youtube.com/channel/UCoC47do520os_4DBMEFGg4A'
-    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        youtube_dl.utils.std_headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36'
-        extra_info = {}
-        download = False
-        ie = selectExtractor(ydl._ies, url)
-        if ie is None:
-            return None
-        ie = ydl.get_info_extractor(ie.ie_key())
-        if not ie.working():
-                ydl.report_warning('The program functionality for this site has been marked as broken, '
-                                   'and will probably not work.')
-        try:
-            ie_result = ie.extract(url)
-            if ie_result is None:
-                return None
-            ydl.add_default_extra_info(ie_result, ie, url)
-                # ydl.process_ie_result(ie_result)
-                # here the url type changed, so we hava to select extractor again
-            url = sanitize_url(ie_result['url'])
-            ie = selectExtractor(ydl._ies, ie_result['url'])
-            ie = ydl.get_info_extractor(ie.ie_key())
-            ie_result = ie.extract(url)
-            ie_entries = ie_result['entries']
-            entries = list(itertools.islice(ie_entries, 0, None))
-        except GeoRestrictedError as e:
-                msg = e.msg
-                if e.countries:
-                    msg += '\nThis video is available in %s.' % ', '.join(
-                        map(ISO3166Utils.short2full, e.countries))
-                msg += '\nYou might want to use a VPN or a proxy server (with --proxy) to workaround.'
-                ydl.report_error(msg)
-        except ExtractorError as e:  # An error we somewhat expected
-                ydl.report_error(compat_str(e), e.format_traceback())
-        except MaxDownloadsReached:
-                raise
-        except Exception as e:
-            if ydl.params.get('ignoreerrors', False):
-                ydl.report_error(error_to_compat_str(e), tb=encode_compat_str(traceback.format_exc()))
-                return None
-            else:
-                raise
-        assert(entries)
-        return 
+    srv = DownloadService()
+    entries = srv.extractChannelSubscription('https://www.youtube.com/channel/UCoC47do520os_4DBMEFGg4A')
+    assert(entries)
+    return 
 
 
 def testDownloadPornHub():

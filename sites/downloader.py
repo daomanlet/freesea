@@ -17,7 +17,12 @@ from youtube_dl.utils import (
     GeoRestrictedError, 
     orderedSet,
     url_basename,
-    ISO3166Utils)
+    sanitize_url,
+    ISO3166Utils,
+    error_to_compat_str,
+    encode_compat_str,
+    compat_str,
+    PagedList)
 from app.config import Config
 from app.email import EmailService
 
@@ -199,6 +204,56 @@ class DownloadService():
                     '[Extract] Finished extracting playlist: %s' % playlist)
         return ie_result
 
+    def _selectExtractor(self, ies, url):
+        for ie in ies:
+            if ie.suitable(url):
+                return ie
+        return None
+
+    def extractChannelSubscription(self, url, user_name = None):
+        entries = None
+        ydl_opts = { }
+        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+            youtube_dl.utils.std_headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36'
+            ie = self._selectExtractor(ydl._ies, url)
+            if ie is None:
+                return None
+            ie = ydl.get_info_extractor(ie.ie_key())
+            if not ie.working():
+                    ydl.report_warning('The program functionality for this site has been marked as broken, '
+                                    'and will probably not work.')
+            try:
+                ie_result = ie.extract(url)
+                if ie_result is None:
+                    return None
+                ydl.add_default_extra_info(ie_result, ie, url)
+                    # ydl.process_ie_result(ie_result)
+                    # here the url type changed, so we hava to select extractor again
+                url = sanitize_url(ie_result['url'])
+                ie = self._selectExtractor(ydl._ies, ie_result['url'])
+                ie = ydl.get_info_extractor(ie.ie_key())
+                ie_result = ie.extract(url)
+                ie_entries = ie_result['entries']
+                entries = list(itertools.islice(ie_entries, 0, None))
+            except GeoRestrictedError as e:
+                    msg = e.msg
+                    if e.countries:
+                        msg += '\nThis video is available in %s.' % ', '.join(
+                            map(ISO3166Utils.short2full, e.countries))
+                    msg += '\nYou might want to use a VPN or a proxy server (with --proxy) to workaround.'
+                    ydl.report_error(msg)
+            except ExtractorError as e:  # An error we somewhat expected
+                    ydl.report_error(compat_str(e), e.format_traceback())
+            except MaxDownloadsReached:
+                    raise
+            except Exception as e:
+                if ydl.params.get('ignoreerrors', False):
+                    ydl.report_error(error_to_compat_str(e), tb=encode_compat_str(traceback.format_exc()))
+                    return None
+                else:
+                    raise
+        return entries 
+       
     def extractSearchSubscription(self, url, user_name):
         ydl_opts = {
         }
