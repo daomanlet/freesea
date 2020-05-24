@@ -5,7 +5,6 @@ import os
 from urllib.parse import urlsplit
 import json
 import urllib3
-import seafileapi
 from app.config import Config
 
 
