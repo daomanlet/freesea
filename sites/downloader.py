@@ -12,9 +12,9 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from youtube_dl.utils import (
     PagedList,
-    MaxDownloadsReached, 
-    ExtractorError, 
-    GeoRestrictedError, 
+    MaxDownloadsReached,
+    ExtractorError,
+    GeoRestrictedError,
     orderedSet,
     url_basename,
     sanitize_url,
@@ -59,16 +59,30 @@ class DownloadService():
             # sendMail.sendMail(ret['email'], content)
             time.sleep(1)
 
-    def downloadVideo(self, url, path, download=False):
+    def downloadVideo(self, url, path, download=False, format='mp4'):
         Path(path).mkdir(parents=True, exist_ok=True)
         fileName = os.path.join(path, "%(title)s.%(ext)s")
-        ydl_opts = {
-            'sleep-interval':10,
-            'outtmpl': fileName,
-            'writesubtitles': True,
-            'format': 'mp4',
-            'writethumbnail': True
-        }
+        if 'mp3' in format:
+            ydl_opts = {
+                'sleep-interval': 10,
+                'outtmpl': fileName,
+                'writesubtitles': True,
+                'format': 'bestaudio/best',
+                'postprocessors': [{
+                    'key': 'FFmpegExtractAudio',
+                    'preferredcodec': 'mp3',
+                    'preferredquality': '192',
+                }],
+                'writethumbnail': True
+            }
+        else:
+            ydl_opts = {
+                'sleep-interval': 10,
+                'outtmpl': fileName,
+                'writesubtitles': True,
+                'format': 'mp4',
+                'writethumbnail': True
+            }
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             ie_result = ydl.extract_info(url, download)
         return ie_result
@@ -210,9 +224,9 @@ class DownloadService():
                 return ie
         return None
 
-    def extractChannelSubscription(self, url, user_name = None):
+    def extractChannelSubscription(self, url, user_name=None):
         entries = None
-        ydl_opts = { }
+        ydl_opts = {}
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             youtube_dl.utils.std_headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36'
             ie = self._selectExtractor(ydl._ies, url)
@@ -220,15 +234,15 @@ class DownloadService():
                 return None
             ie = ydl.get_info_extractor(ie.ie_key())
             if not ie.working():
-                    ydl.report_warning('The program functionality for this site has been marked as broken, '
-                                    'and will probably not work.')
+                ydl.report_warning('The program functionality for this site has been marked as broken, '
+                                   'and will probably not work.')
             try:
                 ie_result = ie.extract(url)
                 if ie_result is None:
                     return None
                 ydl.add_default_extra_info(ie_result, ie, url)
-                    # ydl.process_ie_result(ie_result)
-                    # here the url type changed, so we hava to select extractor again
+                # ydl.process_ie_result(ie_result)
+                # here the url type changed, so we hava to select extractor again
                 url = sanitize_url(ie_result['url'])
                 ie = self._selectExtractor(ydl._ies, ie_result['url'])
                 ie = ydl.get_info_extractor(ie.ie_key())
@@ -236,24 +250,25 @@ class DownloadService():
                 ie_entries = ie_result['entries']
                 entries = list(itertools.islice(ie_entries, 0, None))
             except GeoRestrictedError as e:
-                    msg = e.msg
-                    if e.countries:
-                        msg += '\nThis video is available in %s.' % ', '.join(
-                            map(ISO3166Utils.short2full, e.countries))
-                    msg += '\nYou might want to use a VPN or a proxy server (with --proxy) to workaround.'
-                    ydl.report_error(msg)
+                msg = e.msg
+                if e.countries:
+                    msg += '\nThis video is available in %s.' % ', '.join(
+                        map(ISO3166Utils.short2full, e.countries))
+                msg += '\nYou might want to use a VPN or a proxy server (with --proxy) to workaround.'
+                ydl.report_error(msg)
             except ExtractorError as e:  # An error we somewhat expected
-                    ydl.report_error(compat_str(e), e.format_traceback())
+                ydl.report_error(compat_str(e), e.format_traceback())
             except MaxDownloadsReached:
-                    raise
+                raise
             except Exception as e:
                 if ydl.params.get('ignoreerrors', False):
-                    ydl.report_error(error_to_compat_str(e), tb=encode_compat_str(traceback.format_exc()))
+                    ydl.report_error(error_to_compat_str(
+                        e), tb=encode_compat_str(traceback.format_exc()))
                     return None
                 else:
                     raise
-        return entries 
-       
+        return entries
+
     def extractSearchSubscription(self, url, user_name):
         ydl_opts = {
         }
@@ -261,9 +276,11 @@ class DownloadService():
             res = {'email': user_name, 'rets': None}
             youtube_dl.utils.std_headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36'
             if 'youtube' in url:
-                res['rets'] = ydl.extract_info(url, download=False, process=True)
+                res['rets'] = ydl.extract_info(
+                    url, download=False, process=True)
             else:
-                res['rets'] = ydl.extract_info(url, download=False, process=False)
+                res['rets'] = ydl.extract_info(
+                    url, download=False, process=False)
         return res
 
     def submitSubscribeTask(self, url, site, user_name):

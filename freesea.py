@@ -71,7 +71,12 @@ def dark_search():
 def download():
     site = 'youtube'
     keyword = request.args.get('id')
+    if id is None:
+        return abort(404)
     site = request.args.get('domain')
+    fformat = request.args.get('format')
+    if fformat is None:
+        fformat = 'mp4'
     siteConfig = siteconfig.findAvailableSiteConfigure(site)
     if siteConfig is not None:
         url = siteConfig['video_url'] + keyword
@@ -84,12 +89,12 @@ def download():
         name = current_user.email
     userfolder = os.path.join(Config.VIDEO_WEBDAV, name)
     Path(userfolder).mkdir(parents=True, exist_ok=True)
-    ie_result = downloader.downloadVideo(url, userfolder, True)
-    fileName = ie_result['title']+'.mp4'
+    ie_result = downloader.downloadVideo(url, userfolder, True, fformat)
+    fileName = ie_result['title']+'.'+fformat
     try:
         return send_from_directory(userfolder, filename=fileName, as_attachment=True)
     except FileNotFoundError:
-        abort(200)
+        abort(404)
 
 
 def get_chunk(byte1, byte2, fileName):
@@ -114,6 +119,8 @@ def get_chunk(byte1, byte2, fileName):
 @app.after_request
 def after_request(response):
     response.headers.add('Accept-Ranges', 'bytes')
+    response.headers.add('Cache-Control', 's-maxage=3600')
+    response.headers.add('Cache-Control', 'maxage=3600')
     return response
 
 
@@ -179,7 +186,7 @@ def subscribeChannel():
     url = request.args.get('url')
     if url is None :
         return 404
-        
+
     if 'channel' in url and 'youtube' in url:
         name = ""
         if current_user.is_authenticated:

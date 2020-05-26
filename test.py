@@ -88,6 +88,10 @@ def testDownloadYoutube():
     print(ret)
     return
 
+def testDownloadMP3():
+    url = 'https://www.youtube.com/watch?v=UekXkqU_yIA'
+    srv = DownloadService()
+    srv.downloadVideo(url, Path().absolute(), download=True, format='mp3')
 
 def testDownloadDetail():
     name = 'xia_zhenyu@hotmail.com'
@@ -143,4 +147,5 @@ if __name__ == '__main__':
     # testDownloadPornHub()
     # testDownloadRedirect()
     # testDownloadYoutube()
-    testYoutubeDL_youtube_channel()
+    # testYoutubeDL_youtube_channel()
+    testDownloadMP3()
