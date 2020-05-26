@@ -54,6 +54,12 @@ def selectExtractor(ies, url):
     return None
 
 
+def testYoutubeDL_pornhub_channel():
+    srv = DownloadService()
+    entries = srv.extractChannelSubscription('https://cn.pornhub.com/pornstar/cory-chase')
+    assert(entries)
+    return 
+
 def testYoutubeDL_youtube_channel():
     srv = DownloadService()
     entries = srv.extractChannelSubscription('https://www.youtube.com/channel/UCoC47do520os_4DBMEFGg4A')
@@ -148,4 +154,5 @@ if __name__ == '__main__':
     # testDownloadRedirect()
     # testDownloadYoutube()
     # testYoutubeDL_youtube_channel()
-    testDownloadMP3()
+    # testDownloadMP3()
+    testYoutubeDL_pornhub_channel()

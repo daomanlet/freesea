@@ -5,6 +5,7 @@ RUN apt-get update && apt-get install -y libmemcached-dev \
 	openssl \ 
 	build-essential \
 	libssl-dev \
+	ffmpeg \
 	xvfb 
 RUN git clone https://daomanlet:5Imaomao%40@github.com/daomanlet/freesea.git /opt/freesea
 WORKDIR /opt/freesea

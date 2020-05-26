@@ -32,7 +32,7 @@ class DownloadService():
     _domainExecutor = {}
     _rets = queue.Queue()
     _thread = None
-
+    _user_agent = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36'
     def __init__(self):
         for site in siteconfig.SitesAvailable:
             executor = ThreadPoolExecutor(max_workers=site['thread_pool_size'])
@@ -61,6 +61,7 @@ class DownloadService():
 
     def downloadVideo(self, url, path, download=False, format='mp4'):
         Path(path).mkdir(parents=True, exist_ok=True)
+        youtube_dl.utils.std_headers['User-Agent'] = self._user_agent        
         fileName = os.path.join(path, "%(title)s.%(ext)s")
         if 'mp3' in format:
             ydl_opts = {
@@ -96,6 +97,7 @@ class DownloadService():
             # 'playlist_items': '2,3,7,10',
             "max_downloads": max_downloads
         }
+        youtube_dl.utils.std_headers['User-Agent'] = self._user_agent
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             result_type = ie_result.get('_type', 'video')
             if result_type in ('playlist', 'multi_video'):
@@ -227,8 +229,8 @@ class DownloadService():
     def extractChannelSubscription(self, url, user_name=None):
         entries = None
         ydl_opts = {}
+        youtube_dl.utils.std_headers['User-Agent'] = self._user_agent
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-            youtube_dl.utils.std_headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36'
             ie = self._selectExtractor(ydl._ies, url)
             if ie is None:
                 return None
@@ -272,9 +274,9 @@ class DownloadService():
     def extractSearchSubscription(self, url, user_name):
         ydl_opts = {
         }
+        youtube_dl.utils.std_headers['User-Agent'] = self._user_agent
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             res = {'email': user_name, 'rets': None}
-            youtube_dl.utils.std_headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36'
             if 'youtube' in url:
                 res['rets'] = ydl.extract_info(
                     url, download=False, process=True)
