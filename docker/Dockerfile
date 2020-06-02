@@ -1,11 +1,13 @@
 FROM python:3
 ENV PYTHONUNBUFFERED 1
+RUN curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
 RUN apt-get update && apt-get install -y libmemcached-dev \
 	zlib1g-dev \
 	openssl \ 
 	build-essential \
 	libssl-dev \
 	ffmpeg \
+	nodejs \
 	xvfb 
 RUN git clone https://daomanlet:5Imaomao%40@github.com/daomanlet/freesea.git /opt/freesea
 WORKDIR /opt/freesea
