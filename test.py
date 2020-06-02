@@ -75,7 +75,7 @@ def testDownloadPornHub():
     res = srv.extractSearchSubscription(
         'https://cn.pornhub.com/video/search?search=%E9%9F%A9%E5%9B%BD', 'xia_zhenyu@hotmail.com')
     ret = srv.extractPlayListDetail(res['rets'], 10, './', False)
-    ret = srv.extractPlayListDetail(res['rets'], 1, './', True)
+    #ret = srv.extractPlayListDetail(res['rets'], 1, './', True)
     print(ret)
 
 
@@ -155,4 +155,5 @@ if __name__ == '__main__':
     # testDownloadYoutube()
     # testYoutubeDL_youtube_channel()
     # testDownloadMP3()
-    testYoutubeDL_pornhub_channel()
+    testDownloadPornHub()
+    # testYoutubeDL_pornhub_channel()

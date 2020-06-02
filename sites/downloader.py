@@ -206,7 +206,6 @@ class DownloadService():
                         ydl.to_screen('[Extract] ' + reason)
                         continue
                     try:
-                        time.sleep(2000)
                         entry_result = ydl.process_ie_result(entry,
                                                              download=download,
                                                              extra_info=extra)
