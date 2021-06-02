@@ -52,7 +52,7 @@ six==1.14.0
 SQLAlchemy==1.3.16
 sqlparse==0.3.1
 tqdm==4.45.0
-urllib3==1.25.9
+urllib3==1.26.5
 uWSGI==2.0.18
 Werkzeug==1.0.1
 wkhtmltopdf==0.2
